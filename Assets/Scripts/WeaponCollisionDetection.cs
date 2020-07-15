@@ -18,13 +18,13 @@ public class WeaponCollisionDetection : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
-        {
-            Debug.Log("subject: " + transform.name);
-            Debug.Log("object: " + other.name);
-            other.GetComponent<Animator>().SetTrigger("IsDamaged");
+        //if (other.CompareTag("Enemy"))
+        //{
+        //    Debug.Log("subject: " + transform.name);
+        //    Debug.Log("object: " + other.name);
+        //    other.GetComponent<Animator>().SetTrigger("IsDamaged");
 
-        }
+        //}
 
     }
 }

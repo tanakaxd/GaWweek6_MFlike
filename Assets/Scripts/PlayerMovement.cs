@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UniRx;
 using UniRx.Triggers;
 using System;
@@ -11,16 +12,19 @@ public class PlayerMovement : MonoBehaviour
     private bool isAttacking;
     private bool isAttacked;
     private double downTime = 2;
-    [SerializeField]private Transform enemy;
+    [SerializeField] private Transform enemy;
+    private NavMeshAgent agent;
     [SerializeField]
     private Collider hitRadius;
 
 
-   private void Awake()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
+        agent = GetComponent<NavMeshAgent>();
+        //agent.updatePosition = false;
+        //agent.updateRotation = false;
     }
-    // Start is called before the first frame update
     void Start()
     {
 
@@ -28,7 +32,7 @@ public class PlayerMovement : MonoBehaviour
 
         stateMachine
             .OnStateExitAsObservable()
-            .Where(b => b.StateInfo.IsName("Standing Melee Attack Horizontal"))
+            .Where(b => b.StateInfo.IsName("Standing Melee Attack Horizontal")|| b.StateInfo.IsName("Standing Melee Run Jump Attack"))
             //.SkipWhile(b => b.StateInfo.normalizedTime <= 1.0f)
             .Subscribe(_ => {
                //transform.rotation = Quaternion.Euler(90,90,90);//回転を受け付けない。原因不明。下の方法ならできる。
@@ -37,24 +41,31 @@ public class PlayerMovement : MonoBehaviour
                 //Debug.Log(defaultRotation);
                 //transform.LookAt(enemy);
                 hitRadius.enabled = false;
+                isAttacking = false;
             });
             
 
         var updateObservable = this.UpdateAsObservable();
 
         updateObservable
-            .Where(_ => Input.GetKeyDown("w"))
-            .ThrottleFirst(TimeSpan.FromSeconds(downTime))//subscribeされたときにdownTimeは固定されるっぽい
+            .Where(_ => Input.GetKeyDown("w")&&!isAttacking)
+            //.ThrottleFirst(TimeSpan.FromSeconds(downTime))//subscribeされたときにdownTimeは固定されるっぽい
             .Subscribe(_ => { 
                 animator.SetTrigger("Attack");
                 hitRadius.enabled = true;
+                isAttacking = true;
                     
             }); 
 
         updateObservable
-             .Where(_ => Input.GetKeyDown("q"))
-             .ThrottleFirst(TimeSpan.FromSeconds(5))//subscribeされたときにdownTimeは固定されるっぽい
-             .Subscribe(_ => animator.SetTrigger("JumpAttack"));
+             .Where(_ => Input.GetKeyDown("q") && !isAttacking)
+             //.ThrottleFirst(TimeSpan.FromSeconds(5))//subscribeされたときにdownTimeは固定されるっぽい
+             .Subscribe(_ => {
+                 animator.SetTrigger("JumpAttack");
+                 hitRadius.enabled = true;
+                 isAttacking = true;
+
+             });
 
         //updateObservable
         //    //.Where(_ => Input.GetKeyDown("p"))
@@ -96,23 +107,23 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey("d"))
-        {
-            transform.position += transform.forward * Time.deltaTime;
+        //if (Input.GetKey("d"))
+        //{
+        //    transform.position += transform.forward * Time.deltaTime;
 
-        }
-        else if (Input.GetKey("a"))
-        {
-            transform.position -= transform.forward * Time.deltaTime;
+        //}
+        //else if (Input.GetKey("a"))
+        //{
+        //    transform.position -= transform.forward * Time.deltaTime;
 
-        }
+        //}
     }
 
     private void OnTriggerEnter(Collider other)
     {
         
-        Debug.Log(transform.name+":subject");
-        Debug.Log(other.transform.name+":object");
+        //Debug.Log(transform.name+":subject");
+        //Debug.Log(other.transform.name+":object");
 
         
         //other.GetComponent<Animator>().SetTrigger("IsDamaged");
