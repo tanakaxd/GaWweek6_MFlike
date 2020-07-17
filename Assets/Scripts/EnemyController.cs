@@ -8,37 +8,43 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     private Animator animator;
-    private bool isAttacking;
-    [SerializeField]private bool beingAttacked;
-    private double downTime = 2;
+    private bool beingAttacked;
     [SerializeField] private Transform player;
     [SerializeField] private Transform playerWeapon;
-    [SerializeField]
     private Collider hitRadius;
+
+    public ReactiveProperty<bool> attackingSubject = new ReactiveProperty<bool>();
+
     private float distance;
+
+    [HideInInspector] public ObservableStateMachineTrigger stateMachine;
+
+
     public float Distance { private get; set; }
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        //agent = GetComponent<NavMeshAgent>();
+        stateMachine = animator.GetBehaviour<ObservableStateMachineTrigger>();
 
     }
     void Start()
     {
         var stateMachine = animator.GetBehaviour<ObservableStateMachineTrigger>();
 
-        stateMachine
-            .OnStateExitAsObservable()
-            .Where(b => b.StateInfo.IsName("Standing React Large Gut"))
-            .Subscribe(_ => {
-                beingAttacked = false;
-            });
+        //stateMachine
+        //    .OnStateExitAsObservable()
+        //    .Where(b => b.StateInfo.IsName("Standing React Large Gut"))
+        //    .Subscribe(_ => {
+        //        beingAttacked = false;
+        //    });
 
-        stateMachine
-            .OnStateEnterAsObservable()
-            .Where(b=>b.StateInfo.IsName("Standing React Large Gut"))
-            .Subscribe(_ => {
-                beingAttacked = true;
-            });
+        //stateMachine
+        //    .OnStateEnterAsObservable()
+        //    .Where(b=>b.StateInfo.IsName("Standing React Large Gut"))
+        //    .Subscribe(_ => {
+        //        beingAttacked = true;
+        //    });
 
         this.OnTriggerEnterAsObservable()
             .Where(collider => collider.transform == playerWeapon&&beingAttacked)
@@ -53,6 +59,8 @@ public class EnemyController : MonoBehaviour
     }
 
     public IEnumerator GetKicked()
+        //animator controllerの方で入るまでの秒数と継続時間を書く方法を採用したので使わない予定
+        //やっぱ無理っぽいので使う
     {
         yield return new WaitForSeconds(0.3f);
         animator.SetBool("IsKicked", true);

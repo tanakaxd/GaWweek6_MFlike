@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UniRx;
+﻿using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.AI;
@@ -7,8 +6,10 @@ using UnityEngine.AI;
 public class PlayerMovement : MonoBehaviour
 {
     private Animator animator;
-    private bool isAttacking;
-    private bool isAttacked;
+
+    //private bool isAttacking;
+    private bool beingAttacked;
+
     private double downTime = 2;
     [SerializeField] private Transform enemy;
     private NavMeshAgent agent;
@@ -17,8 +18,9 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitRadius;
 
     public ReactiveProperty<bool> attackingSubject = new ReactiveProperty<bool>();
-    public ReactiveProperty<bool> kickSubject = new ReactiveProperty<bool>();
-    public ObservableStateMachineTrigger stateMachine;
+
+    //public ReactiveProperty<bool> kickSubject = new ReactiveProperty<bool>();
+    [HideInInspector] public ObservableStateMachineTrigger stateMachine;
 
     private float distance;
     public float Distance { private get; set; }
@@ -34,51 +36,48 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        var stateMachine = animator.GetBehaviour<ObservableStateMachineTrigger>();
-
         stateMachine
             .OnStateExitAsObservable()
-            .Where(s => s.StateInfo.IsName("Standing Melee Attack Horizontal") || s.StateInfo.IsName("Standing Melee Run Jump Attack"))
+            .Where(s => s.StateInfo.IsTag("Attack"))
             //.SkipWhile(b => b.StateInfo.normalizedTime <= 1.0f)
             .Subscribe(_ =>
             {
-                //transform.rotation = Quaternion.Euler(90,90,90);//回転を受け付けない。原因不明。下の方法ならできる。
                 Debug.Log("Attack end");
-                //Debug.Log(transform.rotation);
-                //Debug.Log(defaultRotation);
-                //transform.LookAt(enemy);
                 hitRadius.enabled = false;
-                isAttacking = false;
                 attackingSubject.Value = false;
             });
-        stateMachine
-            .OnStateExitAsObservable()
-            .Where(s => s.StateInfo.IsName("Kick"))
-            .Subscribe(_=>kickSubject.Value = false);
 
+        stateMachine
+            .OnStateEnterAsObservable()
+            .Where(s => s.StateInfo.IsTag("Attack"))
+            .Subscribe(_ =>
+            {
+                Debug.Log("Attack begin");
+                hitRadius.enabled = true;
+                attackingSubject.Value = true;
+            });
+
+        //stateMachine
+        //    .OnStateExitAsObservable()
+        //    .Where(s => s.StateInfo.IsName("Kick"))
+        //    .Subscribe(_=>kickSubject.Value = false);
 
         var updateObservable = this.UpdateAsObservable();
 
         updateObservable
-            .Where(_ => Input.GetKeyDown("w") && !isAttacking)
+            .Where(_ => Input.GetKeyDown("w") && !beingAttacked&& !attackingSubject.Value)
             //.ThrottleFirst(TimeSpan.FromSeconds(downTime))//subscribeされたときにdownTimeは固定されるっぽい
             .Subscribe(_ =>
             {
                 animator.SetTrigger("Attack");
-                hitRadius.enabled = true;
-                isAttacking = true;
-                attackingSubject.Value = true;
             });
 
         updateObservable
-             .Where(_ => Input.GetKeyDown("q") && !isAttacking)
+             .Where(_ => Input.GetKeyDown("q") && !beingAttacked && !attackingSubject.Value)
              //.ThrottleFirst(TimeSpan.FromSeconds(5))//subscribeされたときにdownTimeは固定されるっぽい
              .Subscribe(_ =>
              {
                  animator.SetTrigger("JumpAttack");
-                 hitRadius.enabled = true;
-                 isAttacking = true;
-                 attackingSubject.Value = true;
              });
 
         //updateObservable
@@ -114,15 +113,12 @@ public class PlayerMovement : MonoBehaviour
         //    .Subscribe(_=> GetKicked());
 
         updateObservable
-            .Where(_ => Input.GetKeyUp("g"))
-            .Subscribe(_ => StartCoroutine(Kicked()));
-
-        updateObservable
-            .Where(_ => Input.GetKeyDown(KeyCode.Space))
-            .Subscribe(_ => {
-                kickSubject.Value = true;
+            .Where(_ => Input.GetKeyDown(KeyCode.Space) && !beingAttacked && !attackingSubject.Value)
+            .Subscribe(_ =>
+            {
+                //kickSubject.Value = true;
                 animator.SetTrigger("Kick");
-                });
+            });
 
         //this.OnTriggerEnterAsObservable()
         //    //.Where(collider => collider.transform == enemy)
@@ -154,18 +150,13 @@ public class PlayerMovement : MonoBehaviour
         //other.GetComponent<Animator>().SetTrigger("IsDamaged");
     }
 
-    public void GetKicked()
-    {
-        animator.SetBool("IsKicked", true);
-    }
+    //public IEnumerator Kicked()
+    //{
+    //    animator.SetBool("IsKicked", true);
+    //    yield return new WaitForSeconds(1);
+    //    animator.SetBool("IsKicked", false);
 
-    public IEnumerator Kicked()
-    {
-        animator.SetBool("IsKicked", true);
-        yield return new WaitForSeconds(1);
-        animator.SetBool("IsKicked", false);
-
-    }
+    //}
 }
 
 //var clickStream = Observable.EveryUpdate()

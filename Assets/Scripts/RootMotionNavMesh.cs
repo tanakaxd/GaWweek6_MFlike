@@ -27,7 +27,7 @@ public class RootMotionNavMesh : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(agent.nextPosition);
+        //Debug.Log(agent.nextPosition);
         //worldDeltaPosition = agent.nextPosition - transform.position;
         //Debug.Log(worldDeltaPosition);
 

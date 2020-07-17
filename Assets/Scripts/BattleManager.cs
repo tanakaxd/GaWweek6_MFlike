@@ -13,10 +13,9 @@ public class BattleManager : MonoBehaviour
     private Transform playerTransform;
     private Transform enemyTransform;
 
+    //[SerializeField] private BattleUI battleUI;
+
     private float distance;
-
-
-    //public ReactiveProperty<bool> playerIsAttackingSubject = new ReactiveProperty<bool>();
 
     private void Awake()
     {
@@ -37,8 +36,10 @@ public class BattleManager : MonoBehaviour
         //    .Subscribe(_=> StartCoroutine(enemy.GetKicked()));
 
         player.stateMachine.OnStateEnterAsObservable()
-            .Where(s=>s.StateInfo.IsName("Kick"))
-            .Subscribe(_ => StartCoroutine(enemy.GetKicked()));
+            .Where(s => s.StateInfo.IsName("Kick"))
+            //.Subscribe(_ => StartCoroutine(enemy.GetKicked()));
+            .Delay(TimeSpan.FromSeconds(0.5))
+            .Subscribe(_ => enemy.GetComponent<Animator>().SetTrigger("IsKicked"));
 
         this.UpdateAsObservable()
             .Select(_ => Vector3.Distance(playerTransform.position, enemyTransform.position))
