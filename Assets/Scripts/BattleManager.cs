@@ -3,28 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 using UniRx.Triggers;
+using System;
 
 public class BattleManager : MonoBehaviour
 {
 
-    private PlayerMovement player;
-    private EnemyController enemy;
+    [SerializeField]private PlayerMovement player;
+    [SerializeField] private EnemyController enemy;
+    private Transform playerTransform;
+    private Transform enemyTransform;
+
+    private float distance;
 
 
-    public ReactiveProperty<bool> playerIsAttackingSubject = new ReactiveProperty<bool>();
+    //public ReactiveProperty<bool> playerIsAttackingSubject = new ReactiveProperty<bool>();
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        playerTransform = player.transform;
+        enemyTransform = enemy.transform;
+    }
+
     void Start()
     {
         //playerとenemyの橋渡し役
         //どちらかが攻撃しているときは他方は攻撃行動がとれない
         //プレイヤーが攻撃開始を通知してきたら、それを敵に伝える
-        player.playerIsAttackingSubject
-            .Where(x=>x)
-               .subscribe();
+        player.attackingSubject
+            .Subscribe(b=>enemy.Defend(b));
+
+        //player.kickSubject
+        //    .Where(b=>b)
+        //    .Subscribe(_=> StartCoroutine(enemy.GetKicked()));
+
+        player.stateMachine.OnStateEnterAsObservable()
+            .Where(s=>s.StateInfo.IsName("Kick"))
+            .Subscribe(_ => StartCoroutine(enemy.GetKicked()));
+
+        this.UpdateAsObservable()
+            .Select(_ => Vector3.Distance(playerTransform.position, enemyTransform.position))
+            .Subscribe(d => {
+                player.Distance = d;
+                enemy.Distance = d;
+            });
     }
 
-    // Update is called once per frame
     void Update()
     {
         

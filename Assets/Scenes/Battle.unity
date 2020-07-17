@@ -195,6 +195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemy: {fileID: 410613515}
   hitRadius: {fileID: 1242895271}
+  stateMachine: {fileID: 0}
 --- !u!1 &58823577
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,6 +732,7 @@ GameObject:
   - component: {fileID: 8258797748114680394}
   - component: {fileID: 410970927}
   - component: {fileID: 410970928}
+  - component: {fileID: 410970924}
   m_Layer: 0
   m_Name: paladin
   m_TagString: Enemy
@@ -738,6 +740,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &410970924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410970923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cee9fa86b58be84494c079d916bd963, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!95 &410970925
 Animator:
   serializedVersion: 3
@@ -782,7 +796,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 410970923}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.6
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -807,7 +821,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2dfffa8f71338e4f844987f7a84ca40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAttacked: 0
+  beingAttacked: 0
   player: {fileID: 5006512736819552951}
   playerWeapon: {fileID: 1242895270}
   hitRadius: {fileID: 0}
@@ -3417,6 +3431,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d16529aad45e78448835cfb00bc9befc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 52240277}
+  enemy: {fileID: 410970928}
 --- !u!4 &1989386698
 Transform:
   m_ObjectHideFlags: 0
@@ -12812,6 +12828,7 @@ GameObject:
   - component: {fileID: 8296172667708362918}
   - component: {fileID: 8296172667708362917}
   - component: {fileID: 52240277}
+  - component: {fileID: 8296172667708362920}
   m_Layer: 0
   m_Name: brute@Standing Melee Attack Horizontal
   m_TagString: Player
@@ -12884,7 +12901,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 8296172667708362916}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.6
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -12913,6 +12930,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8296172667708362920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8296172667708362916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cee9fa86b58be84494c079d916bd963, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8471817552792776357
 Transform:
   m_ObjectHideFlags: 0

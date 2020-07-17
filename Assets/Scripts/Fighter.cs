@@ -1,18 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class Fighter : MonoBehaviour
+public abstract class Fighter : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    protected Animator animator;
+    protected NavMeshAgent agent;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    protected bool isAttacking;
+    protected bool beingAttacked;
+
+    [SerializeField] protected Transform enemy;
+    [SerializeField] protected Collider hitRadius;
+
+    
+    protected ReactiveProperty<bool> isAttackingSubject = new ReactiveProperty<bool>();
+
+    public ReactiveProperty<bool> IsAttackingSubject { get; private set; }
+
 }
