@@ -8,14 +8,12 @@ using System;
 public class BattleManager : MonoBehaviour
 {
 
-    [SerializeField]private PlayerMovement player;
+    [SerializeField]private PlayerPresenter player;
     [SerializeField] private EnemyController enemy;
     private Transform playerTransform;
     private Transform enemyTransform;
 
     //[SerializeField] private BattleUI battleUI;
-
-    private float distance;
 
     private void Awake()
     {
@@ -28,12 +26,8 @@ public class BattleManager : MonoBehaviour
         //playerとenemyの橋渡し役
         //どちらかが攻撃しているときは他方は攻撃行動がとれない
         //プレイヤーが攻撃開始を通知してきたら、それを敵に伝える
-        player.attackingSubject
+        player.reactiveIsAttacking
             .Subscribe(b=>enemy.Defend(b));
-
-        //player.kickSubject
-        //    .Where(b=>b)
-        //    .Subscribe(_=> StartCoroutine(enemy.GetKicked()));
 
         player.stateMachine.OnStateEnterAsObservable()
             .Where(s => s.StateInfo.IsName("Kick"))
@@ -44,8 +38,8 @@ public class BattleManager : MonoBehaviour
         this.UpdateAsObservable()
             .Select(_ => Vector3.Distance(playerTransform.position, enemyTransform.position))
             .Subscribe(d => {
-                player.Distance = d;
-                enemy.Distance = d;
+                player.reactiveDistance.Value = d;
+                //enemy.distance = d;
             });
     }
 

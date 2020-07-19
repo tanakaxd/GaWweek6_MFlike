@@ -2,6 +2,7 @@
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.AI;
+using System;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -65,7 +66,9 @@ public class PlayerMovement : MonoBehaviour
         var updateObservable = this.UpdateAsObservable();
 
         updateObservable
-            .Where(_ => Input.GetKeyDown("w") && !beingAttacked&& !attackingSubject.Value)
+            .Where(_ => Input.GetKeyDown("w"))
+            .Where(_=> !attackingSubject.Value)
+            .Where(_=> !beingAttacked)
             //.ThrottleFirst(TimeSpan.FromSeconds(downTime))//subscribeされたときにdownTimeは固定されるっぽい
             .Subscribe(_ =>
             {
@@ -125,6 +128,11 @@ public class PlayerMovement : MonoBehaviour
         //    //.Select(other => other.GetComponent<Animator>())
         //    .Subscribe(_ => Debug.Log("jhit"));
         //    //.Subscribe(a=>a.SetTrigger("IsDamaged"));
+
+        //this.OnAnimatorMoveAsObservable().Subscribe(_ => Debug.Log("OnAnimatorMove"));
+        Observable.Interval(TimeSpan.FromSeconds(0.25f))
+            .Where(_ => Input.GetKey("f"))
+            .Subscribe(_ => Debug.Log("f"));
     }
 
     // Update is called once per frame
